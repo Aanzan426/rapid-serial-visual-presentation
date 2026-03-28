@@ -11,10 +11,30 @@
         }
 
         #reader {
-            font-size: 70px;
-            margin-top: 150px;
-            font-weight: bold;
-        }
+    		font-size: 70px;
+    		margin-top: 150px;
+    		font-weight: bold;
+
+    		display: flex;
+    		justify-content: center;
+
+    		font-family: monospace;
+
+    		width: 100%;
+	}
+
+	.word-box {
+    		display: grid;
+    		grid-template-columns: repeat(15, 1ch); /* fixed width grid */
+    		justify-content: center;
+		align-items: center;
+	}
+
+	.char {
+		display: inline-block;
+    		width: 1ch;
+    		text-align: center;
+	}
 
         .orp {
             color: red;
@@ -97,19 +117,44 @@ document.getElementById("pdfUpload").addEventListener("change", async function()
 // ==============================
 // ORP LOGIC (center highlight)
 // ==============================
-function displayWord(word) {
-    let mid = Math.floor(word.length / 2);
-    let output = "";
+function getORPIndex(word) {
+    let len = word.length;
 
-    for (let i = 0; i < word.length; i++) {
-        if (i === mid) {
-            output += `<span class="orp">${word[i]}</span>`;
-        } else {
-            output += word[i];
-        }
+    if (len <= 1) return 0;
+    if (len <= 5) return 1;
+    if (len <= 9) return 2;
+    if (len <= 13) return 3;
+    return 4;
+}
+
+function displayWord(word) {
+    const boxSize = 15;
+    const anchor = Math.floor(boxSize / 2); // fixed center
+
+    let chars = new Array(boxSize).fill(`<span class="char">&nbsp;</span>`);
+
+    let orpIndex = getORPIndex(word);
+
+    // 🔥 Place ORP at fixed anchor
+    chars[anchor] = `<span class="orp char">${word[orpIndex]}</span>`;
+
+    // 🔥 Fill LEFT side
+    let leftPos = anchor - 1;
+    for (let i = orpIndex - 1; i >= 0; i--) {
+        if (leftPos < 0) break;
+        chars[leftPos--] = `<span class="char">${word[i]}</span>`;
     }
 
-    document.getElementById("reader").innerHTML = output;
+    // 🔥 Fill RIGHT side
+    let rightPos = anchor + 1;
+    for (let i = orpIndex + 1; i < word.length; i++) {
+        if (rightPos >= boxSize) break;
+        chars[rightPos++] = `<span class="char">${word[i]}</span>`;
+    }
+
+    // Render
+    document.getElementById("reader").innerHTML =
+        `<div class="word-box">${chars.join("")}</div>`;
 }
 
 // ==============================
