@@ -100,6 +100,9 @@ speed_read/
 │
 ├── frontend/
 │   └── index.html
+|
+├── uploads/
+    └── files
 ```
 
 ---
